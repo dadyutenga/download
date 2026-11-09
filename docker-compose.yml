@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: ./backend
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    tmpfs:
+      - /data:size=1073741824,uid=1000,gid=1000,mode=0700
+      - /tmp:size=67108864
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 768m
+    cpus: 2
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=5)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports: ["127.0.0.1:8080:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
