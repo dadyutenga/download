@@ -1,4 +1,27 @@
-# Validation in this workspace
+# Android 2.0 validation
+
+Performed on 2026-11-11 against the direct-on-device implementation.
+
+## Passed
+
+- Frontend: 17 tests (6 existing website tests, 8 post URL validation tests, 3 native UI flow tests). Direct extraction/quality selection/download completion, cancellation, error recovery, and absence of backend fetches covered with a mocked native bridge.
+- Native JVM tests: 7 passed (4 syndication parser fixtures, 2 trusted MP4 URL/quality tests, 1 existing template test). Parser supports `mediaDetails[].video_info.variants` and legacy `video.variants`, excludes HLS/other hosts, deduplicates URLs, rejects unavailable/video-free posts.
+- TypeScript check, Vite production build, Capacitor Android sync, and Gradle `:app:assembleDebug :app:testDebugUnitTest` passed.
+- Chromium mobile UI at 390×844: direct Android screen loaded with no horizontal overflow or JavaScript runtime errors. This is a browser UI smoke check, not a native plugin/device test.
+- APK signature verified with apksigner (v2); manifest checked with aapt: package `com.xsave.downloader`, version `2.0`/code `2`, minimum SDK 29, target SDK 35.
+- APK SHA-256: `4591de78d3e09b7b0a723f8889accc316ca245334c5a149d08a408546db8652f`.
+
+## Limitations and device checks still required
+
+A proxied request to `cdn.syndication.twimg.com` was denied by cloud network policy (CONNECT 403). No live X extraction or video download success is claimed. On an Android phone with Internet access, verify a permitted public post, quality options, MP4 playback/audio, progress, cancellation, and background download notification/completion. X can restrict posts or change its public endpoint. No authentication cookies or restriction bypass is implemented.
+
+This build is debug-signed with a different certificate from the earlier APK. Uninstall the old test app before installing. Release signing and store distribution are not performed. A physical device/emulator was not run (this environment has no `/dev/kvm`).
+
+The app tracks downloads in memory; after an app/process restart use Android Downloads or its notification for completion. Only the first embedded video and progressive MP4 formats are offered. The browser website still uses the existing backend; the Android app does not.
+
+---
+
+# Historical validation (1.0)
 
 Performed on 2026-11-09.
 

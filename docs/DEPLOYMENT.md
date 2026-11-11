@@ -1,4 +1,6 @@
-# Deployment
+# Website backend deployment
+
+The Android 2.0 app runs directly on the device and does not use this deployment or server settings. These instructions apply to the browser website. Android extraction connects to `cdn.syndication.twimg.com` and downloads MP4 files from `video.twimg.com`.
 
 1. Install Docker Engine and Compose v2 on a Linux host with public DNS and outbound HTTPS to X.
 2. Copy `.env.example` to `.env`, review resource limits, run `docker compose up -d --build`.
@@ -18,8 +20,8 @@ The app currently offers progressive MP4 with included audio only; HLS and separ
 
 Requirements: JDK 21, Android SDK platform 35/build tools 34.0.0 (AGP default), Node 22+, accepted Android SDK licenses. `cd frontend; npm ci; npm run android:sync; cd android; ./gradlew assembleDebug`. Set ANDROID_HOME to your SDK, or create ignored `android/local.properties` with `sdk.dir=...`.
 
-Debug APK: `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (Android 10+). A debug APK is for sideload testing, not Play Store release. For distribution, use your own private signing key via Android Studio's Generate Signed Bundle/APK flow; never commit keystores or signing passwords. Use `bundleRelease` for a signed Play Store AAB. Verify content rights, privacy disclosures, and store rules before distribution. There is no hosted backend provisioned by this repository: configure your own HTTPS server in app Settings.
+Debug APK: `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (Android 10+). A debug APK is for sideload testing, not Play Store release. For distribution, use your own private signing key via Android Studio's Generate Signed Bundle/APK flow; never commit keystores or signing passwords. Use `bundleRelease` for a signed Play Store AAB. Verify content rights, privacy disclosures, and store rules before distribution. Android 2.0 does not need a hosted backend. It extracts public MP4 variants on the device and saves them through Android DownloadManager.
 
 ## Cloud build note
 
-This workspace stores Android tooling outside the checkout under `/workspace/android-sdk` and Gradle under `/workspace/gradle/gradle-8.11.1`. When reusing this prepared machine, set JAVA_HOME to `/workspace/android-sdk/jdk/jdk-21.0.9`, ANDROID_HOME to `/workspace/android-sdk`, ANDROID_USER_HOME to `/workspace/android-sdk/user-home`, and GRADLE_USER_HOME to `/workspace/android-sdk/gradle-home`. The cloud home directory is read-only. Java tooling also needs the inherited proxy translated into `http.proxyHost`, `http.proxyPort`, `https.proxyHost`, and `https.proxyPort` system properties, plus `javax.net.ssl.trustStore=/workspace/android-sdk/java-cacerts` (store password `changeit`, a public CA truststore, not a credential). Keep TLS verification enabled. These cloud-specific overrides are not needed for a normal Android Studio installation.
+In this prepared cloud machine, source `/workspace/android-sdk/sdk-env.sh` before invoking Gradle. It activates the checksum-verified JDK 21, SDK, writable Gradle/user homes, inherited HTTP proxy, and system Java CA trust. These machine-specific settings are outside the checkout; normal Android Studio installations do not need them. Keep TLS verification enabled. The wrapper verifies its pinned Gradle distribution checksum.
